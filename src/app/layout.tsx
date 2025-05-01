@@ -1,15 +1,8 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-})
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-})
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter"
+import AppLayout from "@/components/AppLayout"
+import ThemeProviderCR from "@/app/themeProvider"
+import { Box } from "@mui/material"
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,12 +14,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const headerHeight = 64 // Header height in px
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+      <body style={{ backgroundColor: "white" }}>
+        <ThemeProviderCR>
+          <AppRouterCacheProvider>
+            <AppLayout headerHeight={headerHeight} />
+            <Box bgcolor={"white"} marginTop={`${headerHeight}px`} p={2}>
+              {children}
+            </Box>
+          </AppRouterCacheProvider>
+        </ThemeProviderCR>
       </body>
     </html>
   )
