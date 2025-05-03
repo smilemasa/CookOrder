@@ -16,6 +16,7 @@ const darkTheme = createTheme({
       primary: "#000000",
       secondary: "#FFFFFF",
     },
+    divider: "#9E9E9E",
   },
   components: {
     MuiSvgIcon: {
