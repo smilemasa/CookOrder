@@ -4,6 +4,12 @@ import React, { useState } from "react"
 import { AppBar, Toolbar, IconButton, Typography } from "@mui/material"
 import MenuIcon from "@mui/icons-material/Menu"
 import { SideMenu } from "./SideMenu"
+import { Righteous } from "next/font/google"
+
+const fontRighteous = Righteous({
+  subsets: ["latin"],
+  weight: "400",
+})
 
 export default function AppLayout({
   headerHeight: height,
@@ -24,7 +30,11 @@ export default function AppLayout({
           >
             <MenuIcon sx={{ color: "white" }} />
           </IconButton>
-          <Typography variant="h6" component="div">
+          <Typography
+            variant="h4"
+            component="div"
+            fontFamily={fontRighteous.style.fontFamily}
+          >
             For You
           </Typography>
         </Toolbar>
