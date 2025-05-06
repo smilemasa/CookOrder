@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { Database } from "@/app/_lib/supabase/types"
 
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
 export async function GET() {
   try {
     const supabase = createClient<Database>(

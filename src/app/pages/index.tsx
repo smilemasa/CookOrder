@@ -1,6 +1,6 @@
 import ProductCard from "@/components/ProductCard"
 import { Box } from "@mui/material"
-import { Tables } from "./_lib/supabase/types"
+import { Tables } from "../_lib/supabase/types"
 
 type Dish = Tables<"dishes">
 
@@ -22,6 +22,11 @@ async function getDishes() {
 
 export default async function Home() {
   const dishes = await getDishes()
+  if (!dishes) {
+    return {
+      notFound: true,
+    }
+  }
   return (
     <Box
       sx={{
