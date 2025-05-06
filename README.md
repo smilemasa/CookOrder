@@ -28,9 +28,7 @@
 
 将来的に AWS または GCP でアプリを運用していく予定。
 
-### クライアントアプリ
-
-- Vercel app()
+- [Vercel app](https://cook-order.vercel.app/)
 
 ## データベース
 
