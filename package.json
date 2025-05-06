@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "createTableType": "npx supabase gen types typescript --project-id ewgbneyqcptliotjxjgm --schema public > ./src/app/_lib/supabase/types.ts"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
@@ -16,9 +17,12 @@
     "@mui/material": "^7.0.2",
     "@mui/material-nextjs": "^7.0.2",
     "@next/eslint-plugin-next": "^15.3.1",
+    "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
     "next": "15.3.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "supabase": "^2.22.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",

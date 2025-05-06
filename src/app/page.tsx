@@ -1,8 +1,27 @@
 import ProductCard from "@/components/ProductCard"
-import { productsData } from "@/components/FoodGenerator/foodGenerator"
 import { Box } from "@mui/material"
+import { Tables } from "./_lib/supabase/types"
 
-export default function Home() {
+type Dish = Tables<"dishes">
+
+async function getDishes() {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/dishes`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  )
+  if (!res.ok) throw new Error("Fetch error")
+
+  const dishes: Dish[] = await res.json()
+  return dishes
+}
+
+export default async function Home() {
+  const dishes = await getDishes()
   return (
     <Box
       sx={{
@@ -12,14 +31,15 @@ export default function Home() {
         gap: 1,
       }}
     >
-      {productsData.map((product) => (
-        <ProductCard
-          key={product.id}
-          name={product.name}
-          price={product.price}
-          imageUrl={product.imageUrl}
-        />
-      ))}
+      {!!dishes &&
+        dishes.map((dish) => (
+          <ProductCard
+            key={dish.id}
+            name={dish.name}
+            price={dish.price}
+            imageUrl="https://www.h-maruko.co.jp/images/material/00384.jpg"
+          />
+        ))}
     </Box>
   )
 }
