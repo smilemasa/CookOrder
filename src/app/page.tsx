@@ -1,6 +1,9 @@
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
+
 import ProductCard from "@/components/ProductCard"
 import { Box } from "@mui/material"
-import { Tables } from "../_lib/supabase/types"
+import { Tables } from "./_lib/supabase/types"
 
 type Dish = Tables<"dishes">
 
