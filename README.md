@@ -32,7 +32,7 @@
 
 ## データベース
 
-TBD
+- [supabase](https://supabase.com/dashboard/project/ewgbneyqcptliotjxjgm)
 
 ## デザイン
 
