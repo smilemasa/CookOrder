@@ -1,4 +1,4 @@
-# Cook Order ~FOR YOU~
+# Cook Order ~ FOR YOU ~
 
 ## 目的
 
