@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter"
-import AppLayout from "@/components/AppLayout"
-import ThemeProviderCR from "@/app/themeProvider"
+import AppLayout from "../components/AppLayout"
+import ThemeProviderCR from "./themeProvider"
 import { Box } from "@mui/material"
 
 export const metadata: Metadata = {

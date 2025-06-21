@@ -1,5 +1,5 @@
-import ProductCard from "@/components/ProductCard"
-import { productsData } from "@/components/FoodGenerator/foodGenerator"
+import ProductCard from "../components/ProductCard"
+import { productsData } from "../components/FoodGenerator/foodGenerator"
 import { Box } from "@mui/material"
 
 export default function Home() {
