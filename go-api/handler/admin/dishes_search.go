@@ -11,6 +11,15 @@ import (
 )
 
 // 料理検索ハンドラー
+// @Summary 料理検索
+// @Description 日本語名・英語名で料理を部分一致検索します
+// @Tags dishes
+// @Produce json
+// @Param nameJa query string false "日本語名で部分一致検索"
+// @Param nameEn query string false "英語名で部分一致検索"
+// @Success 200 {array} model.Dish
+// @Failure 400 {object} map[string]string
+// @Router /dishes/search [get]
 func SearchDishes(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
 	if name == "" {

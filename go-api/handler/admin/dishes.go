@@ -11,6 +11,15 @@ import (
 )
 
 // 料理投稿ハンドラー
+// @Summary 新しい料理を登録
+// @Description 新しい料理を登録します
+// @Tags dishes
+// @Accept json
+// @Produce json
+// @Param dish body model.Dish true "Dish情報"
+// @Success 201 {object} model.Dish
+// @Failure 400 {object} map[string]string
+// @Router /dishes [post]
 func PostDish(w http.ResponseWriter, r *http.Request) {
 	var d model.Dish
 	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
@@ -46,6 +55,12 @@ func PostDish(w http.ResponseWriter, r *http.Request) {
 }
 
 // 管理者用の料理取得ハンドラー
+// @Summary 料理一覧取得
+// @Description 料理一覧を取得します
+// @Tags dishes
+// @Produce json
+// @Success 200 {array} model.Dish
+// @Router /dishes [get]
 func AdminGetDishes(w http.ResponseWriter, r *http.Request) {
 	conn, err := db.ConnectDB()
 	if err != nil {

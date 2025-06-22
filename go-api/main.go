@@ -1,3 +1,10 @@
+// Package main CookOrder API
+//
+// @title CookOrder API
+// @version 1.0
+// @description API for searching dishes
+// @host localhost:8080
+// @BasePath /
 package main
 
 import (
