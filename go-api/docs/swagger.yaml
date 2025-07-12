@@ -97,4 +97,33 @@ paths:
       summary: 料理検索
       tags:
       - dishes
+  /dishes/{id}:
+    delete:
+      description: ID指定で料理を削除します
+      parameters:
+      - description: 料理ID
+        name: id
+        in: query
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 料理削除
+      tags:
+      - dishes
 swagger: "2.0"
