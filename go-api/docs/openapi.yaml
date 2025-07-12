@@ -15,23 +15,37 @@ paths:
   /dishes:
     post:
       summary: 新しい料理を登録
-      description: 新しい料理を登録します
+      description: 新しい料理を登録します（写真ファイルと料理情報を同時に送信）
       tags:
         - dishes
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/DishRequest'
-            examples:
-              example1:
-                summary: カレーライスの例
-                value:
-                  nameJa: "カレーライス"
-                  nameEn: "Curry Rice"
-                  price: 800
-                  img: "curry.jpg"
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: 料理の写真ファイル
+                nameJa:
+                  type: string
+                  description: 料理名（日本語）
+                  example: "カレーライス"
+                nameEn:
+                  type: string
+                  description: 料理名（英語）
+                  example: "Curry Rice"
+                price:
+                  type: integer
+                  description: 料理の価格
+                  example: 800
+              required:
+                - photo
+                - nameJa
+                - nameEn
+                - price
       responses:
         '201':
           description: 料理が正常に作成されました

@@ -11,7 +11,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/smilemasa/go-api/handler/admin"
+	"github.com/joho/godotenv"
+	dishes "github.com/smilemasa/go-api/handler/admin/dishes"
 )
 
 // CORS middleware
@@ -33,13 +34,20 @@ func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func init() {
+	// .envファイルを読み込む
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("Error loading .env file")
+	}
+}
+
 func main() {
 	http.HandleFunc("/dishes", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
-			admin.PostDish(w, r)
+			dishes.PostDish(w, r)
 		case http.MethodGet:
-			admin.AdminGetDishes(w, r)
+			dishes.AdminGetDishes(w, r)
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
@@ -48,7 +56,7 @@ func main() {
 	http.HandleFunc("/dishes/search", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			admin.SearchDishes(w, r)
+			dishes.SearchDishes(w, r)
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
@@ -57,9 +65,9 @@ func main() {
 	http.HandleFunc("/dishes/{id}", enableCORS(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPut:
-			admin.PutDish(w, r)
+			dishes.PutDish(w, r)
 		case http.MethodDelete:
-			admin.DeleteDish(w, r)
+			dishes.DeleteDish(w, r)
 		default:
 			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
