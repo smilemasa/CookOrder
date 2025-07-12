@@ -1,85 +1,93 @@
-import React, { useState, useEffect } from 'react';
-import { useMenu } from '../context/MenuContext';
-import './MenuForm.css';
+import React, { useState, useEffect } from "react"
+import { useMenu } from "../context/MenuContext"
+import "./MenuForm.css"
 
-function MenuForm({ initialData = null, onSubmit, onCancel, submitText, loading = false }) {
-  const { categories } = useMenu();
+function MenuForm({
+  initialData = null,
+  onSubmit,
+  onCancel,
+  submitText,
+  loading = false,
+}) {
+  const { categories } = useMenu()
   const [formData, setFormData] = useState({
-    nameJa: '',
-    nameEn: '',
-    price: '',
-    img: ''
-  });
-  const [errors, setErrors] = useState({});
+    nameJa: "",
+    nameEn: "",
+    price: "",
+    img: "",
+  })
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     if (initialData) {
       setFormData({
-        nameJa: initialData.nameJa || initialData.name || '',
-        nameEn: initialData.nameEn || '',
-        price: initialData.price || '',
-        img: initialData.img || initialData.image || ''
-      });
+        nameJa: initialData.nameJa || initialData.name || "",
+        nameEn: initialData.nameEn || "",
+        price: initialData.price || "",
+        img: initialData.img || initialData.image || "",
+      })
     }
-  }, [initialData]);
+  }, [initialData])
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors = {}
 
     if (!formData.nameJa.trim()) {
-      newErrors.nameJa = '日本語名は必須です';
+      newErrors.nameJa = "日本語名は必須です"
     }
 
     if (!formData.price || isNaN(formData.price) || formData.price <= 0) {
-      newErrors.price = '有効な価格を入力してください';
+      newErrors.price = "有効な価格を入力してください"
     }
 
     if (formData.img && !isValidImageUrl(formData.img)) {
-      newErrors.img = '有効な画像URLを入力してください';
+      newErrors.img = "有効な画像URLを入力してください"
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const isValidImageUrl = (url) => {
     try {
-      new URL(url);
-      return /\.(jpg|jpeg|png|gif|webp)$/i.test(url) || url.includes('unsplash.com');
+      new URL(url)
+      return (
+        /\.(jpg|jpeg|png|gif|webp)$/i.test(url) || url.includes("unsplash.com")
+      )
     } catch {
-      return false;
+      return false
     }
-  };
+  }
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+    const { name, value } = e.target
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }));
+      [name]: value,
+    }))
 
     // エラーをクリア
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
-      }));
+        [name]: "",
+      }))
     }
-  };
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     if (validateForm()) {
       const submissionData = {
         id: initialData?.id,
         nameJa: formData.nameJa,
         nameEn: formData.nameEn,
         price: parseInt(formData.price),
-        img: formData.img || '/placeholder-food.jpg'
-      };
-      onSubmit(submissionData);
+        img: formData.img || "/placeholder-food.jpg",
+      }
+      onSubmit(submissionData)
     }
-  };
+  }
 
   return (
     <div className="menu-form-container">
@@ -92,10 +100,12 @@ function MenuForm({ initialData = null, onSubmit, onCancel, submitText, loading 
             name="nameJa"
             value={formData.nameJa}
             onChange={handleChange}
-            className={errors.nameJa ? 'error' : ''}
+            className={errors.nameJa ? "error" : ""}
             placeholder="例: 特製ラーメン"
           />
-          {errors.nameJa && <span className="error-message">{errors.nameJa}</span>}
+          {errors.nameJa && (
+            <span className="error-message">{errors.nameJa}</span>
+          )}
         </div>
 
         <div className="form-group">
@@ -106,10 +116,12 @@ function MenuForm({ initialData = null, onSubmit, onCancel, submitText, loading 
             name="nameEn"
             value={formData.nameEn}
             onChange={handleChange}
-            className={errors.nameEn ? 'error' : ''}
+            className={errors.nameEn ? "error" : ""}
             placeholder="例: Special Ramen"
           />
-          {errors.nameEn && <span className="error-message">{errors.nameEn}</span>}
+          {errors.nameEn && (
+            <span className="error-message">{errors.nameEn}</span>
+          )}
         </div>
 
         <div className="form-group">
@@ -120,11 +132,13 @@ function MenuForm({ initialData = null, onSubmit, onCancel, submitText, loading 
             name="price"
             value={formData.price}
             onChange={handleChange}
-            className={errors.price ? 'error' : ''}
+            className={errors.price ? "error" : ""}
             placeholder="例: 890"
             min="0"
           />
-          {errors.price && <span className="error-message">{errors.price}</span>}
+          {errors.price && (
+            <span className="error-message">{errors.price}</span>
+          )}
         </div>
 
         <div className="form-group">
@@ -135,7 +149,7 @@ function MenuForm({ initialData = null, onSubmit, onCancel, submitText, loading 
             name="img"
             value={formData.img}
             onChange={handleChange}
-            className={errors.img ? 'error' : ''}
+            className={errors.img ? "error" : ""}
             placeholder="例: https://images.unsplash.com/photo-..."
           />
           {errors.img && <span className="error-message">{errors.img}</span>}
@@ -151,10 +165,10 @@ function MenuForm({ initialData = null, onSubmit, onCancel, submitText, loading 
               src={formData.img}
               alt="プレビュー"
               onError={(e) => {
-                e.target.style.display = 'none';
+                e.target.style.display = "none"
               }}
               onLoad={(e) => {
-                e.target.style.display = 'block';
+                e.target.style.display = "block"
               }}
             />
           </div>
@@ -169,17 +183,13 @@ function MenuForm({ initialData = null, onSubmit, onCancel, submitText, loading 
           >
             キャンセル
           </button>
-          <button
-            type="submit"
-            className="submit-btn"
-            disabled={loading}
-          >
-            {loading ? '保存中...' : submitText}
+          <button type="submit" className="submit-btn" disabled={loading}>
+            {loading ? "保存中..." : submitText}
           </button>
         </div>
       </form>
     </div>
-  );
+  )
 }
 
-export default MenuForm;
+export default MenuForm
