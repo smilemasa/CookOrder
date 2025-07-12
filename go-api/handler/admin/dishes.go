@@ -41,17 +41,21 @@ func PostDish(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close(context.Background())
 	fmt.Printf("受け取った値: %+v\n", d)
-	_, err = conn.Exec(context.Background(),
-		`INSERT INTO dishes (name_ja, name_en, price, photo_url) VALUES ($1, $2, $3, $4)`,
+	
+	// idは自動割り当てのため指定しない
+	row := conn.QueryRow(context.Background(),
+		`INSERT INTO dishes (name_ja, name_en, price, photo_url) VALUES ($1, $2, $3, $4) RETURNING id`,
 		d.NameJa, d.NameEn, d.Price, d.Img,
 	)
-	if err != nil {
-		http.Error(w, "データ挿入失敗: "+err.Error(), http.StatusInternalServerError)
+
+	var id string
+	if err := row.Scan(&id); err != nil {
+		http.Error(w, "ID取得失敗: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"status": "created"})
+	json.NewEncoder(w).Encode(map[string]string{"status": "created", "id": id})
 }
 
 // 管理者用の料理取得ハンドラー
@@ -88,4 +92,41 @@ func AdminGetDishes(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(dishes)
+}
+
+// 料理削除ハンドラー
+// @Summary 料理削除
+// @Description ID指定で料理を削除します
+// @Tags dishes
+// @Param id query string true "料理ID"
+// @Success 204 {string} string "No Content"
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /dishes/{id} [delete]
+func DeleteDish(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "IDが指定されていません", http.StatusBadRequest)
+		return
+	}
+
+	conn, err := db.ConnectDB()
+	if err != nil {
+		http.Error(w, "DB接続失敗: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer conn.Close(context.Background())
+
+	result, err := conn.Exec(context.Background(), "DELETE FROM dishes WHERE id = $1", id)
+	if err != nil {
+		http.Error(w, "削除失敗: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		http.Error(w, "指定されたIDの料理が見つかりません", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

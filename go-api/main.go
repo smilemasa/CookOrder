@@ -54,6 +54,19 @@ func main() {
 		}
 	}))
 
+	http.HandleFunc("/dishes/{id}", enableCORS(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodDelete:
+			admin.DeleteDish(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		}
+	}))
+
+	// API仕様書配信
+	http.Handle("/docs/", http.StripPrefix("/docs/", http.FileServer(http.Dir("./docs/"))))
+
 	fmt.Println("🚀 Listening on http://localhost:8080")
+	fmt.Println("📖 API Documentation: http://localhost:8080/docs/")
 	http.ListenAndServe(":8080", nil)
 }
