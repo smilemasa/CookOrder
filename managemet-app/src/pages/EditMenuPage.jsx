@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { useMenu } from "../context/MenuContext"
+import { useGetDishById, useUpdateDish } from "../api"
 import MenuForm from "../components/MenuForm"
 import LoadingSpinner from "../components/LoadingSpinner"
 import ErrorMessage from "../components/ErrorMessage"
@@ -8,42 +8,22 @@ import ErrorMessage from "../components/ErrorMessage"
 function EditMenuPage() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { menus, getMenuById, updateMenu, loading, error } = useMenu()
-  const [currentMenu, setCurrentMenu] = useState(null)
   const [submitError, setSubmitError] = useState(null)
 
-  useEffect(() => {
-    const loadMenu = async () => {
-      try {
-        // まずローカルのmenusから検索
-        const localMenu = menus.find(
-          (m) => m.id === id || m.id === parseInt(id),
-        )
-        if (localMenu) {
-          setCurrentMenu(localMenu)
-        } else if (getMenuById) {
-          // APIから取得を試行
-          const menu = await getMenuById(id)
-          setCurrentMenu(menu)
-        } else if (menus.length > 0) {
-          // メニューが見つからない場合は管理画面に戻る
-          navigate("/manage")
-        }
-      } catch (err) {
-        console.error("メニューの取得に失敗:", err)
-        navigate("/manage")
-      }
-    }
+  // 料理データを取得
+  const {
+    data: currentMenu,
+    isLoading: loading,
+    error,
+  } = useGetDishById(id)
 
-    if (id) {
-      loadMenu()
-    }
-  }, [id, menus, getMenuById, navigate])
+  // 料理更新のmutation
+  const updateDishMutation = useUpdateDish()
 
   const handleSubmit = async (menuData) => {
     try {
       setSubmitError(null)
-      await updateMenu(id, menuData)
+      await updateDishMutation.mutateAsync({ id, dishData: menuData })
       navigate("/manage")
     } catch (err) {
       setSubmitError("メニューの更新に失敗しました。")

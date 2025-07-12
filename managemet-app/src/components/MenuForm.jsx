@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react"
-import { useMenu } from "../context/MenuContext"
 import "./MenuForm.css"
 
 function MenuForm({
@@ -9,7 +8,6 @@ function MenuForm({
   submitText,
   loading = false,
 }) {
-  const { categories } = useMenu()
   const [formData, setFormData] = useState({
     nameJa: "",
     nameEn: "",

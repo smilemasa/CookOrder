@@ -1,7 +1,6 @@
 import React from "react"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
-import { MenuProvider } from "./context/MenuContext"
 import MenuListPage from "./pages/MenuListPage"
 
 const theme = createTheme({
@@ -19,9 +18,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <MenuProvider>
-        <MenuListPage />
-      </MenuProvider>
+      <MenuListPage />
     </ThemeProvider>
   )
 }

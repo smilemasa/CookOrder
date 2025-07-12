@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Container,
   Typography,
@@ -14,24 +14,84 @@ import {
   Search as SearchIcon,
   Restaurant as RestaurantIcon,
 } from "@mui/icons-material"
-import { useMenu } from "../context/MenuContext"
+import { useGetAllDishes, useSearchDishes } from "../api"
 import MenuList from "../components/MenuList"
 
 function MenuListPage() {
-  const { menus, loading, error, searchMenus, fetchMenus } = useMenu()
   const [searchTerm, setSearchTerm] = useState("")
+  const [isSearching, setIsSearching] = useState(false)
 
-  const handleSearchChange = async (event) => {
+  // 全メニュー取得
+  const {
+    data: allMenus = [],
+    isLoading: isLoadingAll,
+    error: allMenusError,
+  } = useGetAllDishes()
+
+  // 検索クエリ
+  const {
+    data: searchResults = [],
+    isLoading: isSearchLoading,
+    error: searchError,
+  } = useSearchDishes(
+    { nameJa: searchTerm, nameEn: searchTerm },
+    {
+      enabled: isSearching && searchTerm.trim().length > 0,
+    }
+  )
+
+  // 表示するメニューデータを決定
+  const menus = isSearching && searchTerm.trim() ? searchResults : allMenus
+  const loading = isSearching ? isSearchLoading : isLoadingAll
+  const error = isSearching ? searchError : allMenusError
+
+  // サンプルデータ（API接続失敗時のフォールバック）
+  const sampleMenuData = [
+    {
+      id: "1",
+      nameJa: "特製ラーメン",
+      nameEn: "Special Ramen",
+      price: 890,
+      img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop",
+    },
+    {
+      id: "2",
+      nameJa: "醤油ラーメン",
+      nameEn: "Soy Sauce Ramen",
+      price: 750,
+    },
+    {
+      id: "3",
+      nameJa: "味噌ラーメン",
+      nameEn: "Miso Ramen",
+      price: 820,
+      img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400&h=300&fit=crop",
+    },
+    {
+      id: "4",
+      nameJa: "チャーハン",
+      nameEn: "Fried Rice",
+      price: 680,
+    },
+    {
+      id: "5",
+      nameJa: "餃子（6個）",
+      nameEn: "Gyoza (6 pieces)",
+      price: 450,
+      img: "https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=400&h=300&fit=crop",
+    },
+  ]
+
+  const handleSearchChange = (event) => {
     const term = event.target.value
     setSearchTerm(term)
-    if (term.trim()) {
-      await searchMenus(term)
-    } else {
-      await fetchMenus()
-    }
+    setIsSearching(term.trim().length > 0)
   }
 
-  if (loading && menus.length === 0) {
+  // エラー時のフォールバックデータ
+  const displayMenus = error ? sampleMenuData : menus
+
+  if (loading && displayMenus.length === 0) {
     return (
       <Container
         sx={{
@@ -132,12 +192,12 @@ function MenuListPage() {
         {/* メニューリスト */}
         <Fade in timeout={1200}>
           <Box>
-            <MenuList menuItems={menus} />
+            <MenuList menuItems={displayMenus} />
           </Box>
         </Fade>
 
         {/* 結果なしメッセージ */}
-        {!loading && menus.length === 0 && (
+        {!loading && displayMenus.length === 0 && (
           <Fade in>
             <Paper
               elevation={2}
