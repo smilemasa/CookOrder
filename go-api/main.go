@@ -74,13 +74,6 @@ func main() {
 		}
 	}))
 
-	port := os.Getenv("APP_PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	fmt.Printf("Server started at :%s\n", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		fmt.Println("Failed to start server:", err)
-	}
+	fmt.Println("🚀 Listening on http://localhost:8080")		port := os.Getenv("APP_PORT")
+	http.ListenAndServe(":8080", nil)
 }
