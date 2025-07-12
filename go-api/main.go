@@ -10,7 +10,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/joho/godotenv"
 	dishes "github.com/smilemasa/go-api/handler/admin/dishes"
@@ -74,6 +73,6 @@ func main() {
 		}
 	}))
 
-	fmt.Println("🚀 Listening on http://localhost:8080")		port := os.Getenv("APP_PORT")
+	fmt.Println("🚀 Listening on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
