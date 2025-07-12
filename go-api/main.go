@@ -65,9 +65,6 @@ func main() {
 		}
 	}))
 
-	// API仕様書配信
-	http.Handle("/docs/", http.StripPrefix("/docs/", http.FileServer(http.Dir("./docs/"))))
-
 	fmt.Println("🚀 Listening on http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
