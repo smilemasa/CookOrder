@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/smilemasa/go-api/db"
@@ -28,19 +27,12 @@ func AdminGetDishes(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close(context.Background())
 
-	// GCSクライアントを作成
-	bucketName := os.Getenv("GCS_BUCKET_NAME")
-	if bucketName == "" {
-		http.Error(w, "GCS_BUCKET_NAME環境変数が設定されていません", http.StatusInternalServerError)
-		return
-	}
-
-	gcsClient, err := utils.NewGCSClient(context.Background(), bucketName)
+	// GCSクライアントを取得
+	gcsClient, err := utils.GetGCSClient()
 	if err != nil {
-		http.Error(w, "GCSクライアント作成失敗: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "GCSクライアント取得失敗: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer gcsClient.Close()
 
 	rows, err := conn.Query(context.Background(), "SELECT id, name_ja, name_en, price, photo_url FROM dishes")
 	if err != nil {

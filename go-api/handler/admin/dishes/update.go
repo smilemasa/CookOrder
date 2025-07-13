@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -110,19 +109,12 @@ func PutDish(w http.ResponseWriter, r *http.Request) {
 		updateDish.Price = price // 既にバリデーション済み
 	}
 
-	// GCSクライアントを作成
-	bucketName := os.Getenv("GCS_BUCKET_NAME")
-	if bucketName == "" {
-		writeErrorResponse(w, http.StatusInternalServerError, "設定", "ストレージの設定が正しくありません")
-		return
-	}
-
-	gcsClient, err := utils.NewGCSClient(context.Background(), bucketName)
+	// GCSクライアントを取得
+	gcsClient, err := utils.GetGCSClient()
 	if err != nil {
-		writeErrorResponse(w, http.StatusInternalServerError, "ストレージ", "ストレージクライアントの作成に失敗しました")
+		writeErrorResponse(w, http.StatusInternalServerError, "ストレージ", "ストレージクライアントの取得に失敗しました")
 		return
 	}
-	defer gcsClient.Close()
 
 	// 写真ファイルの処理（オプショナル）
 	file, handler, err := r.FormFile("photo")

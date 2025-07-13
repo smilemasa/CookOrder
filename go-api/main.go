@@ -8,13 +8,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	dishes "github.com/smilemasa/go-api/handler/admin/dishes"
+	"github.com/smilemasa/go-api/utils"
 )
 
 func init() {
@@ -25,6 +28,26 @@ func init() {
 }
 
 func main() {
+	// GCSクライアントを初期化
+	bucketName := os.Getenv("GCS_BUCKET_NAME")
+	if bucketName == "" {
+		fmt.Println("Warning: GCS_BUCKET_NAME not set in environment")
+	} else {
+		ctx := context.Background()
+		if err := utils.InitGCSClient(ctx, bucketName); err != nil {
+			fmt.Printf("Failed to initialize GCS client: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("GCS client initialized successfully")
+
+		// アプリケーション終了時にGCSクライアントを閉じる
+		defer func() {
+			if err := utils.Close(); err != nil {
+				fmt.Printf("Error closing GCS client: %v\n", err)
+			}
+		}()
+	}
+
 	r := mux.NewRouter()
 
 	// CORS設定 - 本番環境では適切なオリジンを設定

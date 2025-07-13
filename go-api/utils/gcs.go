@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -14,22 +15,43 @@ type GCSClient struct {
 	bucketName string
 }
 
-// NewGCSClient GCSクライアントを作成
-func NewGCSClient(ctx context.Context, bucketName string) (*GCSClient, error) {
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create storage client: %w", err)
-	}
+var (
+	gcsInstance *GCSClient
+	gcsOnce     sync.Once
+	gcsErr      error
+)
 
-	return &GCSClient{
-		client:     client,
-		bucketName: bucketName,
-	}, nil
+// InitGCSClient GCSクライアントを初期化（一度だけ実行される）
+func InitGCSClient(ctx context.Context, bucketName string) error {
+	gcsOnce.Do(func() {
+		client, err := storage.NewClient(ctx)
+		if err != nil {
+			gcsErr = fmt.Errorf("failed to create storage client: %w", err)
+			return
+		}
+
+		gcsInstance = &GCSClient{
+			client:     client,
+			bucketName: bucketName,
+		}
+	})
+	return gcsErr
 }
 
-// Close GCSクライアントを閉じる
-func (g *GCSClient) Close() error {
-	return g.client.Close()
+// GetGCSClient 初期化済みのGCSクライアントを取得
+func GetGCSClient() (*GCSClient, error) {
+	if gcsInstance == nil {
+		return nil, fmt.Errorf("GCS client not initialized. Call InitGCSClient first")
+	}
+	return gcsInstance, nil
+}
+
+// Close グローバルGCSクライアントを閉じる
+func Close() error {
+	if gcsInstance != nil && gcsInstance.client != nil {
+		return gcsInstance.client.Close()
+	}
+	return nil
 }
 
 // CreateSignedURL ファイルアップロード用のSignedURLを作成
