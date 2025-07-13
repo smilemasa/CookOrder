@@ -1,7 +1,9 @@
 import {
     ArrowBack as ArrowBackIcon,
     Cancel as CancelIcon,
+    Delete as DeleteIcon,
     Edit as EditIcon,
+    PhotoCamera as PhotoCameraIcon,
     Save as SaveIcon
 } from "@mui/icons-material"
 import {
@@ -14,6 +16,7 @@ import {
     Chip,
     CircularProgress,
     IconButton,
+    Input,
     Paper,
     Stack,
     TextField,
@@ -22,13 +25,15 @@ import {
 import React, { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useGetDishById, useUpdateDish } from "../api/hooks"
-import { Dish } from "../api/services"
+import { DishUpdateRequest } from "../api/services"
 
 const DishDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
-  const [editedDish, setEditedDish] = useState<Partial<Dish>>({})
+  const [editedDish, setEditedDish] = useState<DishUpdateRequest>({})
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const {
     data: dish,
@@ -42,13 +47,13 @@ const DishDetailPage: React.FC = () => {
   const updateDishMutation = useUpdateDish()
 
   // 編集モードに入る
+  // 編集モードに入る
   const handleEditClick = () => {
     setIsEditing(true)
     setEditedDish({
-      nameJa: dish?.nameJa || dish?.name || "",
+      nameJa: dish?.nameJa || "",
       nameEn: dish?.nameEn || "",
-      price: dish?.price || 0,
-      img: dish?.img || dish?.image || ""
+      price: dish?.price || 0
     })
   }
 
@@ -56,6 +61,51 @@ const DishDetailPage: React.FC = () => {
   const handleCancelEdit = () => {
     setIsEditing(false)
     setEditedDish({})
+    setSelectedImageFile(null)
+    setImagePreview(null)
+  }
+
+  // ファイル選択ハンドラー
+  const handleImageFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // ファイルサイズチェック（5MBまで）
+      if (file.size > 5 * 1024 * 1024) {
+        alert("ファイルサイズは5MB以下にしてください")
+        return
+      }
+
+      // ファイル形式チェック
+      if (!file.type.startsWith('image/')) {
+        alert("画像ファイルを選択してください")
+        return
+      }
+
+      setSelectedImageFile(file)
+
+      // プレビュー用のDataURLを作成
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const result = e.target?.result as string
+        setImagePreview(result)
+        // ファイルをeditedDishに設定
+        setEditedDish(prev => ({
+          ...prev,
+          photo: file
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // 画像削除ハンドラー
+  const handleImageDelete = () => {
+    setSelectedImageFile(null)
+    setImagePreview(null)
+    setEditedDish(prev => {
+      const { photo, ...rest } = prev
+      return rest
+    })
   }
 
   // 変更を保存
@@ -69,6 +119,8 @@ const DishDetailPage: React.FC = () => {
       })
       setIsEditing(false)
       setEditedDish({})
+      setSelectedImageFile(null)
+      setImagePreview(null)
       refetch() // データを再取得
     } catch (error) {
       console.error("保存に失敗しました:", error)
@@ -81,7 +133,7 @@ const DishDetailPage: React.FC = () => {
   }
 
   // フォーム値の変更
-  const handleInputChange = (field: keyof Dish) => (
+  const handleInputChange = (field: keyof DishUpdateRequest) => (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = field === "price" ? Number(event.target.value) : event.target.value
@@ -140,8 +192,8 @@ const DishDetailPage: React.FC = () => {
     )
   }
 
-  const displayImage = dish.img || dish.image || "/placeholder-dish.svg"
-  const displayName = dish.nameJa || dish.name || "名前なし"
+  const displayImage = dish.img || "/placeholder-dish.svg"
+  const displayName = dish.nameJa || "名前なし"
 
   return (
     <Box p={3} maxWidth="800px" mx="auto">
@@ -171,19 +223,73 @@ const DishDetailPage: React.FC = () => {
       <Paper elevation={3}>
         <Card>
           {/* 画像セクション */}
-          <CardMedia
-            component="img"
-            height="300"
-            image={isEditing ? editedDish.img || displayImage : displayImage}
-            alt={displayName}
-            sx={{
-              objectFit: "cover",
-              bgcolor: "grey.100"
-            }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/placeholder-dish.svg"
-            }}
-          />
+          <Box sx={{ position: 'relative' }}>
+            <CardMedia
+              component="img"
+              height="300"
+              image={isEditing ? (imagePreview || displayImage) : displayImage}
+              alt={displayName}
+              sx={{
+                objectFit: "cover",
+                bgcolor: "grey.100"
+              }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/placeholder-dish.svg"
+              }}
+            />
+
+            {/* 編集モード時の画像コントロール */}
+            {isEditing && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 16,
+                  right: 16,
+                  display: 'flex',
+                  gap: 1
+                }}
+              >
+                <Input
+                  type="file"
+                  inputProps={{
+                    accept: "image/*",
+                    id: "image-upload"
+                  }}
+                  onChange={handleImageFileSelect}
+                  sx={{ display: 'none' }}
+                />
+                <label htmlFor="image-upload">
+                  <IconButton
+                    component="span"
+                    sx={{
+                      bgcolor: 'primary.main',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'primary.dark'
+                      }
+                    }}
+                  >
+                    <PhotoCameraIcon />
+                  </IconButton>
+                </label>
+
+                {(imagePreview || selectedImageFile) && (
+                  <IconButton
+                    onClick={handleImageDelete}
+                    sx={{
+                      bgcolor: 'error.main',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'error.dark'
+                      }
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
+              </Box>
+            )}
+          </Box>
 
           <CardContent>
             <Stack spacing={3}>
@@ -249,22 +355,6 @@ const DishDetailPage: React.FC = () => {
                   </Typography>
                 )}
               </Box>
-
-              {/* 画像URL */}
-              {isEditing && (
-                <Box>
-                  <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                    画像URL
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    value={editedDish.img || ""}
-                    onChange={handleInputChange("img")}
-                    placeholder="画像URLを入力してください"
-                    variant="outlined"
-                  />
-                </Box>
-              )}
 
               {/* アクションボタン */}
               <Stack direction="row" spacing={2} justifyContent="flex-end">

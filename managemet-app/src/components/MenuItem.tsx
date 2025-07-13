@@ -8,24 +8,17 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface MenuItemType {
-  id: string | number;
-  nameJa?: string;
-  nameEn?: string;
-  name?: string;
-  price?: number;
-}
+import { Dish } from '../api/services';
 
 interface MenuItemProps {
-  item: MenuItemType;
+  item: Dish;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
   const navigate = useNavigate()
 
-  // Dishモデルに対応（後方互換性を保つ）
-  const displayName = item.nameJa || item.name || 'Unknown Dish'
+  // 新しいDishモデルに対応
+  const displayName = item.nameJa || 'Unknown Dish'
   const displayPrice = item.price || 0
 
   const handleCardClick = () => {

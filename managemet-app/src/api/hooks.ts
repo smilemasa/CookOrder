@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query"
-import { Dish, dishService, SearchParams } from "./services"
+import { Dish, dishService, DishUpdateRequest, SearchParams } from "./services"
 
 // クエリキー
 export const QUERY_KEYS = {
   DISHES: ["dishes"],
-  DISH_BY_ID: (id: string | number) => ["dishes", id],
+  DISH_BY_ID: (id: string) => ["dishes", id],
   SEARCH_DISHES: (params: SearchParams) => ["dishes", "search", params],
 }
 
@@ -21,7 +21,7 @@ export const useGetAllDishes = (options: Omit<UseQueryOptions<Dish[]>, 'queryKey
 }
 
 // 料理詳細取得
-export const useGetDishById = (id: string | number, options: Omit<UseQueryOptions<Dish>, 'queryKey' | 'queryFn'> = {}) => {
+export const useGetDishById = (id: string, options: Omit<UseQueryOptions<Dish>, 'queryKey' | 'queryFn'> = {}) => {
   return useQuery({
     queryKey: QUERY_KEYS.DISH_BY_ID(id),
     queryFn: () => dishService.getDishById(id),
@@ -36,7 +36,7 @@ export const useSearchDishes = (searchParams: SearchParams, options: Omit<UseQue
   return useQuery({
     queryKey: QUERY_KEYS.SEARCH_DISHES(searchParams),
     queryFn: () => dishService.searchDishes(searchParams),
-    enabled: options.enabled !== undefined ? options.enabled : !!(searchParams.nameJa || searchParams.nameEn), // 検索パラメータがある場合のみ実行
+    enabled: options.enabled !== undefined ? options.enabled : !!searchParams.name, // 検索パラメータがある場合のみ実行
     staleTime: 5 * 60 * 1000,
     ...options,
   })
@@ -63,7 +63,7 @@ export const useUpdateDish = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, dishData }: { id: string | number; dishData: Partial<Dish> }) =>
+    mutationFn: ({ id, dishData }: { id: string; dishData: DishUpdateRequest }) =>
       dishService.updateDish(id, dishData),
     onSuccess: (data, variables) => {
       // 更新成功時に該当料理のキャッシュを更新
@@ -103,5 +103,5 @@ export const useUpdateMenu = useUpdateDish
 export const useDeleteMenu = useDeleteDish
 
 export const useSearchMenus = (query: string, options: Omit<UseQueryOptions<Dish[]>, 'queryKey' | 'queryFn'> = {}) => {
-  return useSearchDishes({ nameJa: query, nameEn: query }, options)
+  return useSearchDishes({ name: query }, options)
 }
