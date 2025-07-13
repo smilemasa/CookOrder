@@ -127,6 +127,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   '/dishes/{id}':
+    get:
+      summary: 料理詳細取得
+      description: ID指定で料理の詳細を取得します
+      tags:
+        - dishes
+      parameters:
+        - in: path
+          name: id
+          description: 取得する料理のID
+          schema:
+            type: string
+          required: true
+          example: '1'
+      responses:
+        '200':
+          description: 料理の詳細が正常に取得されました
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+        '400':
+          description: 不正なリクエスト
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 指定されたIDの料理が見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     put:
       summary: 料理更新
       description: ID指定で料理を更新します（写真ファイルと料理情報を個別に更新可能）
