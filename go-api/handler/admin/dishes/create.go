@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/smilemasa/go-api/db"
@@ -74,13 +73,6 @@ func PostDish(w http.ResponseWriter, r *http.Request) {
 
 	// Generate secure file name with timestamp and UUID
 	uniqueFileName := generateSecureFileName(header.Filename)
-
-	// Get GCS bucket name from environment variables
-	bucketName := os.Getenv("GCS_BUCKET_NAME")
-	if bucketName == "" {
-		writeErrorResponse(w, http.StatusInternalServerError, "設定", "ストレージの設定が正しくありません")
-		return
-	}
 
 	// Upload file to GCS
 	ctx := context.Background()
