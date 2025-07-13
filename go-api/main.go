@@ -14,34 +14,39 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
-	"github.com/smilemasa/go-api/config"
 	dishes "github.com/smilemasa/go-api/handler/admin/dishes"
 	"github.com/smilemasa/go-api/utils"
 )
 
+func init() {
+	// .envファイルを読み込む
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("Error loading .env file")
+	}
+}
+
 func main() {
-	// 設定を読み込む
-	cfg, err := config.Load()
-	if err != nil {
-		fmt.Printf("Failed to load configuration: %v\n", err)
-		os.Exit(1)
-	}
-
 	// GCSクライアントを初期化
-	ctx := context.Background()
-	if err := utils.InitGCSClient(ctx, cfg.GCS.BucketName); err != nil {
-		fmt.Printf("Failed to initialize GCS client: %v\n", err)
-		os.Exit(1)
-	}
-	fmt.Println("GCS client initialized successfully")
-
-	// アプリケーション終了時にGCSクライアントを閉じる
-	defer func() {
-		if err := utils.Close(); err != nil {
-			fmt.Printf("Error closing GCS client: %v\n", err)
+	bucketName := os.Getenv("GCS_BUCKET_NAME")
+	if bucketName == "" {
+		fmt.Println("Warning: GCS_BUCKET_NAME not set in environment")
+	} else {
+		ctx := context.Background()
+		if err := utils.InitGCSClient(ctx, bucketName); err != nil {
+			fmt.Printf("Failed to initialize GCS client: %v\n", err)
+			os.Exit(1)
 		}
-	}()
+		fmt.Println("GCS client initialized successfully")
+
+		// アプリケーション終了時にGCSクライアントを閉じる
+		defer func() {
+			if err := utils.Close(); err != nil {
+				fmt.Printf("Error closing GCS client: %v\n", err)
+			}
+		}()
+	}
 
 	r := mux.NewRouter()
 
