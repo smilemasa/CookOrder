@@ -3,7 +3,6 @@ package admin
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -201,7 +200,6 @@ func PutDish(w http.ResponseWriter, r *http.Request) {
 
 		if objectName != "" {
 			// 1時間の有効期限で署名付きURLを生成
-			fmt.Println("ConvertToSignedURL objectName:", objectName)
 			signedURL, err := gcsClient.CreateDownloadSignedURL(context.Background(), objectName, 1*time.Hour)
 			if err != nil {
 				writeErrorResponse(w, http.StatusInternalServerError, "画像", "署名付きURL生成に失敗しました")
