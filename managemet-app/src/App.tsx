@@ -1,6 +1,8 @@
 import CssBaseline from "@mui/material/CssBaseline"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import React from "react"
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import DishDetailPage from "./pages/DishDetailPage"
 import MenuListPage from "./pages/MenuListPage"
 
 const theme = createTheme({
@@ -18,7 +20,12 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <MenuListPage />
+      <Router>
+        <Routes>
+          <Route path="/" element={<MenuListPage />} />
+          <Route path="/dish/:id" element={<DishDetailPage />} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   )
 }

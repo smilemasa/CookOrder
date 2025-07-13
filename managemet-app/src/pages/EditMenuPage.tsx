@@ -47,7 +47,7 @@ const EditMenuPage: React.FC = () => {
       <div className="page-header">
         <h1>✏️ メニューを編集</h1>
         <p>
-          「{currentMenu.nameJa || currentMenu.name}」の情報を編集してください
+          「{currentMenu.nameJa}」の情報を編集してください
         </p>
       </div>
 

@@ -1,17 +1,17 @@
 import {
-    Restaurant as RestaurantIcon,
-    Search as SearchIcon,
+  Restaurant as RestaurantIcon,
+  Search as SearchIcon,
 } from '@mui/icons-material'
 import {
-    Alert,
-    Box,
-    CircularProgress,
-    Container,
-    Fade,
-    InputAdornment,
-    Paper,
-    TextField,
-    Typography,
+  Alert,
+  Box,
+  CircularProgress,
+  Container,
+  Fade,
+  InputAdornment,
+  Paper,
+  TextField,
+  Typography,
 } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 import { useGetAllDishes, useSearchDishes } from '../api'
@@ -34,7 +34,7 @@ const MenuListPage: React.FC = () => {
     isLoading: isSearchLoading,
     error: searchError,
   } = useSearchDishes(
-    { nameJa: searchTerm, nameEn: searchTerm },
+    { name: searchTerm },
     {
       enabled: isSearching && searchTerm.trim().length > 0,
     },

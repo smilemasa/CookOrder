@@ -7,26 +7,22 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-
-interface MenuItemType {
-  id: string | number;
-  nameJa?: string;
-  nameEn?: string;
-  name?: string;
-  price?: number;
-}
+import { useNavigate } from 'react-router-dom';
+import { Dish } from '../api/services';
 
 interface MenuItemProps {
-  item: MenuItemType;
+  item: Dish;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
-  // Dishモデルに対応（後方互換性を保つ）
-  const displayName = item.nameJa || item.name || 'Unknown Dish'
+  const navigate = useNavigate()
+
+  // 新しいDishモデルに対応
+  const displayName = item.nameJa || 'Unknown Dish'
   const displayPrice = item.price || 0
 
   const handleCardClick = () => {
-    console.log(`${displayName}が選択されました`)
+    navigate(`/dish/${item.id}`)
   }
 
   return (

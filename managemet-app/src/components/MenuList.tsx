@@ -1,14 +1,10 @@
 import { List } from '@mui/material';
 import React from 'react';
+import { Dish } from '../api/services';
 import MenuItem from './MenuItem';
 
-interface MenuItemType {
-  id: string | number;
-  [key: string]: any;
-}
-
 interface MenuListProps {
-  menuItems: MenuItemType[];
+  menuItems: Dish[];
 }
 
 const MenuList: React.FC<MenuListProps> = ({ menuItems }) => {
