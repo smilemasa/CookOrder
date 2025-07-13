@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.0.1
 info:
   title: CookOrder API
   version: 1.0.0
@@ -6,11 +6,10 @@ info:
   license:
     name: MIT
 servers:
-  - url: http://localhost:8080
+  - url: 'http://localhost:8080'
     description: Development server
-  - url: https://api.cookorder.com
+  - url: 'https://api.cookorder.com'
     description: Production server (仮想)
-
 paths:
   /dishes:
     post:
@@ -32,11 +31,11 @@ paths:
                 nameJa:
                   type: string
                   description: 料理名（日本語）
-                  example: "カレーライス"
+                  example: カレーライス
                 nameEn:
                   type: string
                   description: 料理名（英語）
-                  example: "Curry Rice"
+                  example: Curry Rice
                 price:
                   type: integer
                   description: 料理の価格
@@ -56,10 +55,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "created"
+                    example: created
                   id:
                     type: string
-                    example: "1"
+                    example: '1'
         '400':
           description: 不正な入力値
           content:
@@ -72,7 +71,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
     get:
       summary: 料理一覧取得
       description: 料理一覧を取得します（管理者用）
@@ -93,7 +91,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
   /dishes/search:
     get:
       summary: 料理検索
@@ -107,7 +104,7 @@ paths:
           description: 検索する料理名（日本語または英語）
           schema:
             type: string
-          example: "カレー"
+          example: カレー
       responses:
         '200':
           description: 検索結果が正常に取得されました
@@ -129,35 +126,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-  /dishes/{id}:
+  '/dishes/{id}':
     put:
       summary: 料理更新
-      description: ID指定で料理を更新します
+      description: ID指定で料理を更新します（写真ファイルと料理情報を個別に更新可能）
       tags:
         - dishes
       parameters:
-        - name: id
-          in: query
-          required: true
+        - in: path
+          name: id
           description: 更新する料理のID
           schema:
             type: string
-          example: "1"
+          required: true
+          example: '1'
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/DishRequest'
-            examples:
-              example1:
-                summary: カレーライス更新の例
-                value:
-                  nameJa: "カレーライス（辛口）"
-                  nameEn: "Spicy Curry Rice"
-                  price: 850
-                  img: "spicy_curry.jpg"
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: 料理の写真ファイル（変更する場合のみ）
+                nameJa:
+                  type: string
+                  description: 料理名（日本語）
+                  example: カレーライス（辛口）
+                nameEn:
+                  type: string
+                  description: 料理名（英語）
+                  example: Spicy Curry Rice
+                price:
+                  type: integer
+                  description: 料理の価格
+                  example: 850
       responses:
         '200':
           description: 料理が正常に更新されました
@@ -166,7 +171,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Dish'
         '400':
-          description: 不正な入力値またはIDが指定されていません
+          description: 不正な入力値
           content:
             application/json:
               schema:
@@ -183,7 +188,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
     delete:
       summary: 料理削除
       description: ID指定で料理を削除します
@@ -191,17 +195,17 @@ paths:
         - dishes
       parameters:
         - name: id
-          in: query
-          required: true
-          description: 削除する料理のID
           schema:
             type: string
-          example: "1"
+          required: true
+          in: path
+          description: 削除する料理のID
+          example: '1'
       responses:
         '204':
           description: 料理が正常に削除されました
         '400':
-          description: IDが指定されていません
+          description: 不正なリクエスト
           content:
             application/json:
               schema:
@@ -218,7 +222,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
 components:
   schemas:
     Dish:
@@ -227,15 +230,15 @@ components:
         id:
           type: string
           description: 料理ID
-          example: "1"
+          example: '1'
         nameJa:
           type: string
           description: 日本語名
-          example: "カレーライス"
+          example: カレーライス
         nameEn:
           type: string
           description: 英語名
-          example: "Curry Rice"
+          example: Curry Rice
         price:
           type: integer
           description: 価格（円）
@@ -244,7 +247,7 @@ components:
         img:
           type: string
           description: 画像URL
-          example: "curry.jpg"
+          example: curry.jpg
       required:
         - id
         - nameJa
@@ -252,23 +255,22 @@ components:
         - price
         - img
       example:
-        id: "1"
-        nameJa: "カレーライス"
-        nameEn: "Curry Rice"
+        id: '1'
+        nameJa: カレーライス
+        nameEn: Curry Rice
         price: 800
-        img: "curry.jpg"
-
+        img: curry.jpg
     DishRequest:
       type: object
       properties:
         nameJa:
           type: string
           description: 日本語名
-          example: "カレーライス"
+          example: カレーライス
         nameEn:
           type: string
           description: 英語名
-          example: "Curry Rice"
+          example: Curry Rice
         price:
           type: integer
           description: 価格（円）
@@ -277,28 +279,26 @@ components:
         img:
           type: string
           description: 画像URL
-          example: "curry.jpg"
+          example: curry.jpg
       required:
         - nameJa
         - nameEn
         - price
         - img
       example:
-        nameJa: "カレーライス"
-        nameEn: "Curry Rice"
+        nameJa: カレーライス
+        nameEn: Curry Rice
         price: 800
-        img: "curry.jpg"
-
+        img: curry.jpg
     Error:
       type: object
       properties:
         error:
           type: string
           description: エラーメッセージ
-          example: "不正な入力値"
+          example: 不正な入力値
       required:
         - error
-
 tags:
   - name: dishes
     description: 料理に関するAPI
