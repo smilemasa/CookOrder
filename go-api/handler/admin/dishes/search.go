@@ -3,11 +3,15 @@ package admin
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/smilemasa/go-api/db"
 	"github.com/smilemasa/go-api/model"
+	"github.com/smilemasa/go-api/utils"
 )
 
 // 料理検索ハンドラー
@@ -34,6 +38,20 @@ func SearchDishes(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close(context.Background())
 
+	// GCSクライアントを作成
+	bucketName := os.Getenv("GCS_BUCKET_NAME")
+	if bucketName == "" {
+		http.Error(w, "GCS_BUCKET_NAME環境変数が設定されていません", http.StatusInternalServerError)
+		return
+	}
+
+	gcsClient, err := utils.NewGCSClient(context.Background(), bucketName)
+	if err != nil {
+		http.Error(w, "GCSクライアント作成失敗: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer gcsClient.Close()
+
 	rows, err := conn.Query(
 		context.Background(),
 		"SELECT id, name_ja, name_en, price, photo_url FROM dishes WHERE name_ja ILIKE $1 OR name_en ILIKE $1",
@@ -52,6 +70,33 @@ func SearchDishes(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "データスキャン失敗: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		// 画像URLを署名付きURLに変換
+		if d.Img != "" {
+			var objectName string
+			if strings.HasPrefix(d.Img, "https://storage.googleapis.com/") {
+				// 完全URLからオブジェクト名を抽出
+				urlParts := strings.Split(d.Img, "/")
+				if len(urlParts) >= 2 {
+					objectName = urlParts[len(urlParts)-1] // ファイル名を取得
+				}
+			} else {
+				// ファイル名のみの場合はそのまま使用
+				objectName = d.Img
+			}
+
+			if objectName != "" {
+				// 1時間の有効期限で署名付きURLを生成
+				fmt.Println("ConvertToSignedURL objectName:", objectName)
+				signedURL, err := gcsClient.CreateDownloadSignedURL(context.Background(), objectName, 1*time.Hour)
+				if err != nil {
+					http.Error(w, "署名付きURL生成失敗: "+err.Error(), http.StatusInternalServerError)
+					return
+				}
+				d.Img = signedURL
+			}
+		}
+
 		dishes = append(dishes, d)
 	}
 
