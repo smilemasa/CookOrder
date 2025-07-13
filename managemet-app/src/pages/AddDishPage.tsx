@@ -1,26 +1,26 @@
+import {
+    ArrowBack as ArrowBackIcon,
+    Cancel as CancelIcon,
+    Delete as DeleteIcon,
+    PhotoCamera as PhotoCameraIcon,
+    Save as SaveIcon
+} from "@mui/icons-material"
+import {
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    CardMedia,
+    IconButton,
+    Input,
+    Paper,
+    Stack,
+    TextField,
+    Typography
+} from "@mui/material"
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardMedia,
-  IconButton,
-  Input,
-  Paper,
-  Stack,
-  TextField,
-  Typography
-} from "@mui/material"
-import {
-  ArrowBack as ArrowBackIcon,
-  PhotoCamera as PhotoCameraIcon,
-  Delete as DeleteIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon
-} from "@mui/icons-material"
 import { useCreateDish } from "../api/hooks"
 import { DishCreateRequest } from "../api/services"
 
@@ -92,23 +92,23 @@ const AddDishPage: React.FC = () => {
   // バリデーション
   const validateForm = (): string[] => {
     const errors: string[] = []
-    
+
     if (!dishData.nameJa.trim()) {
       errors.push("料理名（日本語）は必須です")
     }
-    
+
     if (!dishData.nameEn.trim()) {
       errors.push("料理名（英語）は必須です")
     }
-    
+
     if (!dishData.price || dishData.price <= 0) {
       errors.push("価格は1円以上で入力してください")
     }
-    
+
     if (!selectedImageFile) {
       errors.push("画像ファイルを選択してください")
     }
-    
+
     return errors
   }
 
@@ -127,7 +127,7 @@ const AddDishPage: React.FC = () => {
         ...dishData,
         photo: selectedImageFile
       }
-      
+
       await createDishMutation.mutateAsync(createData)
       navigate("/") // 作成成功時は一覧ページに戻る
     } catch (error) {
@@ -204,7 +204,7 @@ const AddDishPage: React.FC = () => {
                 <Typography variant="h6">画像を選択してください</Typography>
               </Box>
             )}
-            
+
             {/* 画像コントロール */}
             <Box
               sx={{
@@ -217,7 +217,7 @@ const AddDishPage: React.FC = () => {
             >
               <Input
                 type="file"
-                inputProps={{ 
+                inputProps={{
                   accept: "image/*",
                   id: "image-upload"
                 }}
@@ -238,7 +238,7 @@ const AddDishPage: React.FC = () => {
                   <PhotoCameraIcon />
                 </IconButton>
               </label>
-              
+
               {imagePreview && (
                 <IconButton
                   onClick={handleImageDelete}
