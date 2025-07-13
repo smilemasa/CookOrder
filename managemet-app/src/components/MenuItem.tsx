@@ -7,6 +7,7 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface MenuItemType {
   id: string | number;
@@ -21,12 +22,14 @@ interface MenuItemProps {
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
+  const navigate = useNavigate()
+
   // Dishモデルに対応（後方互換性を保つ）
   const displayName = item.nameJa || item.name || 'Unknown Dish'
   const displayPrice = item.price || 0
 
   const handleCardClick = () => {
-    console.log(`${displayName}が選択されました`)
+    navigate(`/dish/${item.id}`)
   }
 
   return (
