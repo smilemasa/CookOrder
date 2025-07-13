@@ -15,6 +15,11 @@ import {
     CardMedia,
     Chip,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     IconButton,
     Input,
     Paper,
@@ -24,7 +29,7 @@ import {
 } from "@mui/material"
 import React, { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { useGetDishById, useUpdateDish } from "../api/hooks"
+import { useDeleteDish, useGetDishById, useUpdateDish } from "../api/hooks"
 import { DishUpdateRequest } from "../api/services"
 
 const DishDetailPage: React.FC = () => {
@@ -34,6 +39,7 @@ const DishDetailPage: React.FC = () => {
   const [editedDish, setEditedDish] = useState<DishUpdateRequest>({})
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const {
     data: dish,
@@ -45,6 +51,30 @@ const DishDetailPage: React.FC = () => {
   })
 
   const updateDishMutation = useUpdateDish()
+  const deleteDishMutation = useDeleteDish()
+
+  // 削除確認ダイアログを開く
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true)
+  }
+
+  // 削除確認ダイアログを閉じる
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false)
+  }
+
+  // 削除を実行
+  const handleDeleteConfirm = async () => {
+    if (!id) return
+
+    try {
+      await deleteDishMutation.mutateAsync(id)
+      setDeleteDialogOpen(false)
+      navigate("/") // 削除後は一覧ページに戻る
+    } catch (error) {
+      console.error("削除に失敗しました:", error)
+    }
+  }
 
   // 編集モードに入る
   // 編集モードに入る
@@ -219,6 +249,12 @@ const DishDetailPage: React.FC = () => {
         </Alert>
       )}
 
+      {deleteDishMutation.isError && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          削除に失敗しました。もう一度お試しください。
+        </Alert>
+      )}
+
       {/* メインコンテンツ */}
       <Paper elevation={3}>
         <Card>
@@ -357,40 +393,92 @@ const DishDetailPage: React.FC = () => {
               </Box>
 
               {/* アクションボタン */}
-              <Stack direction="row" spacing={2} justifyContent="flex-end">
-                {isEditing ? (
-                  <>
-                    <Button
-                      variant="outlined"
-                      onClick={handleCancelEdit}
-                      startIcon={<CancelIcon />}
-                      disabled={updateDishMutation.isPending}
-                    >
-                      キャンセル
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={handleSave}
-                      startIcon={<SaveIcon />}
-                      disabled={updateDishMutation.isPending}
-                    >
-                      {updateDishMutation.isPending ? "保存中..." : "保存"}
-                    </Button>
-                  </>
-                ) : (
+              <Stack direction="row" spacing={2} justifyContent="space-between">
+                {/* 削除ボタン（編集モードでない時のみ表示） */}
+                {!isEditing && (
                   <Button
-                    variant="contained"
-                    onClick={handleEditClick}
-                    startIcon={<EditIcon />}
+                    variant="outlined"
+                    color="error"
+                    onClick={handleDeleteClick}
+                    startIcon={<DeleteIcon />}
+                    disabled={deleteDishMutation.isPending}
                   >
-                    編集
+                    削除
                   </Button>
                 )}
+
+                {/* 編集・保存ボタン */}
+                <Stack direction="row" spacing={2}>
+                  {isEditing ? (
+                    <>
+                      <Button
+                        variant="outlined"
+                        onClick={handleCancelEdit}
+                        startIcon={<CancelIcon />}
+                        disabled={updateDishMutation.isPending}
+                      >
+                        キャンセル
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={handleSave}
+                        startIcon={<SaveIcon />}
+                        disabled={updateDishMutation.isPending}
+                      >
+                        {updateDishMutation.isPending ? "保存中..." : "保存"}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      onClick={handleEditClick}
+                      startIcon={<EditIcon />}
+                    >
+                      編集
+                    </Button>
+                  )}
+                </Stack>
               </Stack>
             </Stack>
           </CardContent>
         </Card>
       </Paper>
+
+      {/* 削除確認ダイアログ */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          料理の削除
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            「{dish?.nameJa}」を削除しますか？
+            <br />
+            この操作は取り消すことができません。
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleDeleteCancel}
+            disabled={deleteDishMutation.isPending}
+          >
+            キャンセル
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            color="error"
+            variant="contained"
+            disabled={deleteDishMutation.isPending}
+            startIcon={<DeleteIcon />}
+          >
+            {deleteDishMutation.isPending ? "削除中..." : "削除"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
