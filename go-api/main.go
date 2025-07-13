@@ -39,10 +39,10 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Println("GCS client initialized successfully")
-		
+
 		// アプリケーション終了時にGCSクライアントを閉じる
 		defer func() {
-			if err := utils.CloseGlobalGCSClient(); err != nil {
+			if err := utils.Close(); err != nil {
 				fmt.Printf("Error closing GCS client: %v\n", err)
 			}
 		}()
