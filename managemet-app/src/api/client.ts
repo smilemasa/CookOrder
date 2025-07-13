@@ -1,6 +1,13 @@
-import axios from "axios"
+import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+interface DomainError {
+  type: 'API_ERROR' | 'NETWORK_ERROR' | 'UNKNOWN_ERROR';
+  status?: number;
+  message: string;
+  data?: any;
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -16,7 +23,7 @@ apiClient.interceptors.response.use(
     // AxiosエラーをDomainエラーに変換
     if (error.response) {
       // サーバーエラー (4xx, 5xx)
-      const domainError = {
+      const domainError: DomainError = {
         type: 'API_ERROR',
         status: error.response.status,
         message: error.response.data?.message || error.message,
@@ -24,16 +31,16 @@ apiClient.interceptors.response.use(
       }
       return Promise.reject(domainError)
     }
-    
+
     if (error.request) {
       // ネットワークエラー
-      const domainError = {
+      const domainError: DomainError = {
         type: 'NETWORK_ERROR',
         message: 'ネットワークエラーが発生しました'
       }
       return Promise.reject(domainError)
     }
-    
+
     // その他のエラー
     return Promise.reject({
       type: 'UNKNOWN_ERROR',

@@ -1,6 +1,6 @@
-import React from "react"
-import { ThemeProvider, createTheme } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
+import { ThemeProvider, createTheme } from "@mui/material/styles"
+import React from "react"
 import MenuListPage from "./pages/MenuListPage"
 
 const theme = createTheme({
@@ -14,7 +14,7 @@ const theme = createTheme({
   },
 })
 
-function App() {
+const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

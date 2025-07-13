@@ -1,17 +1,17 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { dishService } from "./services"
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query"
+import { Dish, dishService, SearchParams } from "./services"
 
 // クエリキー
 export const QUERY_KEYS = {
   DISHES: ["dishes"],
-  DISH_BY_ID: (id) => ["dishes", id],
-  SEARCH_DISHES: (params) => ["dishes", "search", params],
+  DISH_BY_ID: (id: string | number) => ["dishes", id],
+  SEARCH_DISHES: (params: SearchParams) => ["dishes", "search", params],
 }
 
 // 料理関連のカスタムフック
 
 // 全料理取得
-export const useGetAllDishes = (options = {}) => {
+export const useGetAllDishes = (options: Omit<UseQueryOptions<Dish[]>, 'queryKey' | 'queryFn'> = {}) => {
   return useQuery({
     queryKey: QUERY_KEYS.DISHES,
     queryFn: dishService.getAllDishes,
@@ -21,7 +21,7 @@ export const useGetAllDishes = (options = {}) => {
 }
 
 // 料理詳細取得
-export const useGetDishById = (id, options = {}) => {
+export const useGetDishById = (id: string | number, options: Omit<UseQueryOptions<Dish>, 'queryKey' | 'queryFn'> = {}) => {
   return useQuery({
     queryKey: QUERY_KEYS.DISH_BY_ID(id),
     queryFn: () => dishService.getDishById(id),
@@ -32,7 +32,7 @@ export const useGetDishById = (id, options = {}) => {
 }
 
 // 料理検索
-export const useSearchDishes = (searchParams, options = {}) => {
+export const useSearchDishes = (searchParams: SearchParams, options: Omit<UseQueryOptions<Dish[]>, 'queryKey' | 'queryFn'> = {}) => {
   return useQuery({
     queryKey: QUERY_KEYS.SEARCH_DISHES(searchParams),
     queryFn: () => dishService.searchDishes(searchParams),
@@ -63,7 +63,8 @@ export const useUpdateDish = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, dishData }) => dishService.updateDish(id, dishData),
+    mutationFn: ({ id, dishData }: { id: string | number; dishData: Partial<Dish> }) =>
+      dishService.updateDish(id, dishData),
     onSuccess: (data, variables) => {
       // 更新成功時に該当料理のキャッシュを更新
       queryClient.setQueryData(QUERY_KEYS.DISH_BY_ID(variables.id), data)
@@ -82,7 +83,7 @@ export const useDeleteDish = () => {
 
   return useMutation({
     mutationFn: dishService.deleteDish,
-    onSuccess: (data, deletedId) => {
+    onSuccess: (_, deletedId) => {
       // 削除成功時に該当料理のキャッシュを削除
       queryClient.removeQueries({ queryKey: QUERY_KEYS.DISH_BY_ID(deletedId) })
       // 料理一覧を再取得
@@ -101,6 +102,6 @@ export const useCreateMenu = useCreateDish
 export const useUpdateMenu = useUpdateDish
 export const useDeleteMenu = useDeleteDish
 
-export const useSearchMenus = (query, options = {}) => {
+export const useSearchMenus = (query: string, options: Omit<UseQueryOptions<Dish[]>, 'queryKey' | 'queryFn'> = {}) => {
   return useSearchDishes({ nameJa: query, nameEn: query }, options)
 }
