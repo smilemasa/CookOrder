@@ -35,9 +35,12 @@ var (
 func Load() (*Config, error) {
 	var err error
 	once.Do(func() {
-		// .envファイルを読み込む
-		if loadErr := godotenv.Load(); loadErr != nil {
-			fmt.Printf("Warning: .env file not found: %v\n", loadErr)
+		// 開発環境でのみ.envファイルを読み込む
+		// Cloud Runなどの本番環境では環境変数が直接設定される
+		if os.Getenv("ENVIRONMENT") != "production" {
+			if loadErr := godotenv.Load(); loadErr != nil {
+				fmt.Printf("Info: .env file not found (this is normal in production): %v\n", loadErr)
+			}
 		}
 
 		config = &Config{}
@@ -59,13 +62,24 @@ func Load() (*Config, error) {
 		config.GCS.BucketName = os.Getenv("GCS_BUCKET_NAME")
 
 		// 必須設定のバリデーション
+		var missingVars []string
+
 		if config.GCS.BucketName == "" {
-			err = fmt.Errorf("GCS_BUCKET_NAME environment variable is required")
-			return
+			missingVars = append(missingVars, "GCS_BUCKET_NAME")
 		}
 
-		if config.DB.Host == "" || config.DB.User == "" || config.DB.Database == "" {
-			err = fmt.Errorf("database configuration is incomplete")
+		if config.DB.Host == "" {
+			missingVars = append(missingVars, "PG_HOST")
+		}
+		if config.DB.User == "" {
+			missingVars = append(missingVars, "PG_USER")
+		}
+		if config.DB.Database == "" {
+			missingVars = append(missingVars, "PG_DATABASE")
+		}
+
+		if len(missingVars) > 0 {
+			err = fmt.Errorf("missing required environment variables: %v", missingVars)
 			return
 		}
 	})
