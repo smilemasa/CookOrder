@@ -84,12 +84,11 @@ func PostDish(w http.ResponseWriter, r *http.Request) {
 
 	// Upload file to GCS
 	ctx := context.Background()
-	gcsClient, err := utils.NewGCSClient(ctx, bucketName)
+	gcsClient, err := utils.GetGCSClient()
 	if err != nil {
-		writeErrorResponse(w, http.StatusInternalServerError, "ストレージ", "ストレージクライアントの作成に失敗しました")
+		writeErrorResponse(w, http.StatusInternalServerError, "ストレージ", "ストレージクライアントの取得に失敗しました")
 		return
 	}
-	defer gcsClient.Close()
 
 	// ファイルの内容を読み取り
 	fileBytes, err := io.ReadAll(file)
