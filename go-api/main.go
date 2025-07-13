@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -59,13 +60,22 @@ func main() {
 
 	r := mux.NewRouter()
 
-	// CORS設定 - 本番環境では適切なオリジンを設定
+	// CORS設定 - 環境変数から設定を取得
+	allowedOrigins := getCORSOrigins()
+	isDevelopment := os.Getenv("ENVIRONMENT") != "production"
+
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"}, // 開発環境用
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
+		AllowedOrigins: allowedOrigins,
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{
+			"Accept",
+			"Authorization",
+			"Content-Type",
+			"X-CSRF-Token",
+			"X-Requested-With",
+		},
 		AllowCredentials: true,
-		Debug:            false, // 開発時のみ
+		Debug:            isDevelopment, // 開発環境でのみデバッグ有効
 	})
 
 	// CORSミドルウェアを適用
@@ -87,4 +97,37 @@ func main() {
 		port = "8080" // ローカル用のデフォルト
 	}
 	http.ListenAndServe(":"+port, handler)
+}
+
+// getCORSOrigins 環境変数からCORSの許可オリジンを取得
+func getCORSOrigins() []string {
+	// 環境変数からオリジンを取得（カンマ区切り）
+	originsEnv := os.Getenv("CORS_ALLOWED_ORIGINS")
+
+	// 環境変数が設定されていない場合のデフォルト値
+	if originsEnv == "" {
+		environment := os.Getenv("ENVIRONMENT")
+		if environment == "production" {
+			// 本番環境のデフォルト（実際のドメインに変更してください）
+			return []string{
+				"https://your-production-domain.com",
+				"https://www.your-production-domain.com",
+			}
+		} else {
+			// 開発環境のデフォルト
+			return []string{
+				"http://localhost:3000",
+				"http://localhost:3001",
+				"http://127.0.0.1:3000",
+			}
+		}
+	}
+
+	// カンマ区切りの文字列をスライスに変換
+	origins := strings.Split(originsEnv, ",")
+	for i, origin := range origins {
+		origins[i] = strings.TrimSpace(origin)
+	}
+
+	return origins
 }
