@@ -63,7 +63,7 @@ func main() {
 	// CORS設定 - 環境変数から設定を取得
 	allowedOrigins := getCORSOrigins()
 	isDevelopment := os.Getenv("ENVIRONMENT") != "production"
-
+	fmt.Printf("CORS allowed origins: %v\n", allowedOrigins)
 	c := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
