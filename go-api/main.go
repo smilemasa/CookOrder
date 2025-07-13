@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
+	"github.com/smilemasa/go-api/config"
 	dishes "github.com/smilemasa/go-api/handler/admin/dishes"
 	"github.com/smilemasa/go-api/utils"
 )
@@ -28,10 +29,18 @@ func init() {
 }
 
 func main() {
+	// 設定を読み込む
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Printf("Failed to load config: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("Config loaded successfully")
+
 	// GCSクライアントを初期化
-	bucketName := os.Getenv("GCS_BUCKET_NAME")
+	bucketName := cfg.GCS.BucketName
 	if bucketName == "" {
-		fmt.Println("Warning: GCS_BUCKET_NAME not set in environment")
+		fmt.Println("Warning: GCS_BUCKET_NAME not set in configuration")
 	} else {
 		ctx := context.Background()
 		if err := utils.InitGCSClient(ctx, bucketName); err != nil {
@@ -56,7 +65,7 @@ func main() {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
-		Debug:            true, // 開発時のみ
+		Debug:            false, // 開発時のみ
 	})
 
 	// CORSミドルウェアを適用
@@ -68,6 +77,7 @@ func main() {
 
 	r.HandleFunc("/dishes/search", dishes.SearchDishes).Methods("GET")
 
+	r.HandleFunc("/dishes/{id}", dishes.AdminGetDish).Methods("GET")
 	r.HandleFunc("/dishes/{id}", dishes.PutDish).Methods("PUT")
 	r.HandleFunc("/dishes/{id}", dishes.DeleteDish).Methods("DELETE")
 
