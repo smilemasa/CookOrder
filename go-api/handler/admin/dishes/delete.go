@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/smilemasa/go-api/db"
 )
 
@@ -11,13 +12,15 @@ import (
 // @Summary 料理削除
 // @Description ID指定で料理を削除します
 // @Tags dishes
-// @Param id query string true "料理ID"
+// @Param id path string true "料理ID"
 // @Success 204 {string} string "No Content"
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Router /dishes/{id} [delete]
 func DeleteDish(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	// URLパラメータからIDを取得
+	vars := mux.Vars(r)
+	id := vars["id"]
 	if id == "" {
 		http.Error(w, "IDが指定されていません", http.StatusBadRequest)
 		return

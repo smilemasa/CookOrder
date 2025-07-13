@@ -3,10 +3,14 @@ package admin
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/smilemasa/go-api/db"
 	"github.com/smilemasa/go-api/model"
+	"github.com/smilemasa/go-api/utils"
 )
 
 // 管理者用の料理取得ハンドラー
@@ -24,6 +28,20 @@ func AdminGetDishes(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close(context.Background())
 
+	// GCSクライアントを作成
+	bucketName := os.Getenv("GCS_BUCKET_NAME")
+	if bucketName == "" {
+		http.Error(w, "GCS_BUCKET_NAME環境変数が設定されていません", http.StatusInternalServerError)
+		return
+	}
+
+	gcsClient, err := utils.NewGCSClient(context.Background(), bucketName)
+	if err != nil {
+		http.Error(w, "GCSクライアント作成失敗: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer gcsClient.Close()
+
 	rows, err := conn.Query(context.Background(), "SELECT id, name_ja, name_en, price, photo_url FROM dishes")
 	if err != nil {
 		http.Error(w, "データ取得失敗: "+err.Error(), http.StatusInternalServerError)
@@ -38,6 +56,25 @@ func AdminGetDishes(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "データスキャン失敗: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		// 画像URLを署名付きURLに変換
+		originalImg := d.Img
+		if d.Img != "" {
+			// 1時間の有効期限で署名付きURLを生成
+			fmt.Println("ConvertToSignedURL objectName:", d.Img)
+			signedURL, err := gcsClient.CreateDownloadSignedURL(context.Background(), d.Img, 1*time.Hour)
+			if err != nil {
+				http.Error(w, "署名付きURL生成失敗: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			d.Img = signedURL
+		}
+
+		// デバッグ用（本番環境では削除）
+		if originalImg != d.Img {
+			fmt.Printf("画像URL変換: %s -> %s\n", originalImg, d.Img)
+		}
+
 		dishes = append(dishes, d)
 	}
 

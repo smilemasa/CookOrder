@@ -11,28 +11,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	dishes "github.com/smilemasa/go-api/handler/admin/dishes"
 )
-
-// CORS middleware
-func enableCORS(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Set CORS headers
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-		// Handle preflight requests
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		next(w, r)
-	}
-}
 
 func init() {
 	// .envファイルを読み込む
@@ -42,37 +25,29 @@ func init() {
 }
 
 func main() {
-	http.HandleFunc("/dishes", enableCORS(func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodPost:
-			dishes.PostDish(w, r)
-		case http.MethodGet:
-			dishes.AdminGetDishes(w, r)
-		default:
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		}
-	}))
+	r := mux.NewRouter()
 
-	http.HandleFunc("/dishes/search", enableCORS(func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			dishes.SearchDishes(w, r)
-		default:
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		}
-	}))
+	// CORS設定 - 本番環境では適切なオリジンを設定
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"}, // 開発環境用
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		Debug:            true, // 開発時のみ
+	})
 
-	http.HandleFunc("/dishes/{id}", enableCORS(func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodPut:
-			dishes.PutDish(w, r)
-		case http.MethodDelete:
-			dishes.DeleteDish(w, r)
-		default:
-			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		}
-	}))
+	// CORSミドルウェアを適用
+	handler := c.Handler(r)
+
+	// Routes
+	r.HandleFunc("/dishes", dishes.PostDish).Methods("POST")
+	r.HandleFunc("/dishes", dishes.AdminGetDishes).Methods("GET")
+
+	r.HandleFunc("/dishes/search", dishes.SearchDishes).Methods("GET")
+
+	r.HandleFunc("/dishes/{id}", dishes.PutDish).Methods("PUT")
+	r.HandleFunc("/dishes/{id}", dishes.DeleteDish).Methods("DELETE")
 
 	fmt.Println("🚀 Listening on http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", handler)
 }
