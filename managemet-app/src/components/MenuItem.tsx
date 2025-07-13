@@ -1,6 +1,5 @@
 import {
     Box,
-    Chip,
     ListItem,
     ListItemText,
     Paper,
@@ -31,22 +30,31 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
       elevation={1}
       sx={{
         mb: 2,
-        borderRadius: 2,
+        borderRadius: 3,
         cursor: 'pointer',
-        transition: 'all 0.2s ease-in-out',
+        transition: 'all 0.3s ease-in-out',
+        border: '1px solid',
+        borderColor: 'grey.200',
         '&:hover': {
-          elevation: 3,
-          transform: 'translateX(4px)',
+          elevation: 4,
+          transform: 'translateY(-2px)',
+          borderColor: 'primary.light',
+          boxShadow: '0 8px 25px rgba(25, 118, 210, 0.15)',
         },
       }}
       onClick={handleCardClick}
     >
       <ListItemText
+        sx={{ flex: 1 }}
         primary={
           <Typography
             variant="h6"
             component="span"
-            sx={{ fontWeight: 'bold' }}
+            sx={{ 
+              fontWeight: 'bold',
+              color: 'text.primary',
+              fontSize: '1.1rem',
+            }}
           >
             {displayName}
           </Typography>
@@ -56,25 +64,51 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ fontStyle: 'italic', mt: 0.5 }}
+              sx={{ 
+                fontStyle: 'italic', 
+                mt: 0.5,
+                fontSize: '0.9rem',
+              }}
             >
               {item.nameEn}
             </Typography>
           )
         }
       />
-      <Box sx={{ ml: 2 }}>
-        <Chip
-          label={`¥${displayPrice?.toLocaleString()}`}
-          color="primary"
-          variant="filled"
+      <Box sx={{ 
+        ml: 3, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'flex-end',
+        minWidth: 'fit-content',
+        px: 2,
+        py: 1,
+        borderRadius: 2,
+        bgcolor: 'grey.50',
+        border: '1px solid',
+        borderColor: 'grey.200',
+      }}>
+        <Typography
+          variant="h6"
           sx={{
             fontWeight: 'bold',
-            fontSize: '1rem',
-            height: 32,
-            borderRadius: 2,
+            color: 'primary.main',
+            fontSize: '1.3rem',
+            lineHeight: 1,
           }}
-        />
+        >
+          ¥{displayPrice?.toLocaleString()}
+        </Typography>
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.secondary',
+            fontSize: '0.7rem',
+            mt: 0.25,
+          }}
+        >
+          税込
+        </Typography>
       </Box>
     </ListItem>
   )

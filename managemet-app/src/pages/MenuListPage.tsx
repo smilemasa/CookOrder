@@ -85,11 +85,10 @@ const MenuListPage: React.FC = () => {
         {/* ヘッダー */}
         <Fade in timeout={800}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
-            <Box sx={{ textAlign: 'center', flexGrow: 1 }}>
+            <Box>
               <Typography
                 variant="h3"
                 component="h1"
-                gutterBottom
                 sx={{
                   fontWeight: 'bold',
                   color: 'primary.main',
@@ -97,13 +96,14 @@ const MenuListPage: React.FC = () => {
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
                 }}
               >
                 <RestaurantIcon
                   sx={{
-                    fontSize: 'inherit',
-                    mr: 1,
-                    verticalAlign: 'middle',
+                    fontSize: '3rem',
                     color: 'primary.main',
                   }}
                 />
@@ -114,14 +114,19 @@ const MenuListPage: React.FC = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => navigate('/add')}
+              size="large"
               sx={{
                 borderRadius: 3,
                 px: 3,
                 py: 1.5,
-                fontSize: '1.1rem',
+                fontSize: '1rem',
+                fontWeight: 'bold',
                 boxShadow: 3,
+                minWidth: '160px',
                 '&:hover': {
                   boxShadow: 6,
+                  transform: 'translateY(-2px)',
+                  transition: 'all 0.2s ease-in-out',
                 }
               }}
             >
