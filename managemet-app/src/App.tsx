@@ -2,6 +2,7 @@ import CssBaseline from "@mui/material/CssBaseline"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 import React from "react"
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import AddDishPage from "./pages/AddDishPage"
 import DishDetailPage from "./pages/DishDetailPage"
 import MenuListPage from "./pages/MenuListPage"
 
@@ -23,6 +24,7 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/" element={<MenuListPage />} />
+          <Route path="/add" element={<AddDishPage />} />
           <Route path="/dish/:id" element={<DishDetailPage />} />
         </Routes>
       </Router>

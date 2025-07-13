@@ -1,23 +1,28 @@
 import {
+  Add as AddIcon,
   Restaurant as RestaurantIcon,
   Search as SearchIcon,
 } from '@mui/icons-material'
 import {
   Alert,
   Box,
+  Button,
   CircularProgress,
   Container,
   Fade,
   InputAdornment,
   Paper,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useGetAllDishes, useSearchDishes } from '../api'
 import MenuList from '../components/MenuList'
 
 const MenuListPage: React.FC = () => {
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [isSearching, setIsSearching] = useState(false)
 
@@ -79,31 +84,50 @@ const MenuListPage: React.FC = () => {
       <Box sx={{ py: 4 }}>
         {/* ヘッダー */}
         <Fade in timeout={800}>
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography
-              variant="h3"
-              component="h1"
-              gutterBottom
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 4 }}>
+            <Box sx={{ textAlign: 'center', flexGrow: 1 }}>
+              <Typography
+                variant="h3"
+                component="h1"
+                gutterBottom
+                sx={{
+                  fontWeight: 'bold',
+                  color: 'primary.main',
+                  background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                <RestaurantIcon
+                  sx={{
+                    fontSize: 'inherit',
+                    mr: 1,
+                    verticalAlign: 'middle',
+                    color: 'primary.main',
+                  }}
+                />
+                料理メニュー
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/add')}
               sx={{
-                fontWeight: 'bold',
-                color: 'primary.main',
-                background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                borderRadius: 3,
+                px: 3,
+                py: 1.5,
+                fontSize: '1.1rem',
+                boxShadow: 3,
+                '&:hover': {
+                  boxShadow: 6,
+                }
               }}
             >
-              <RestaurantIcon
-                sx={{
-                  fontSize: 'inherit',
-                  mr: 1,
-                  verticalAlign: 'middle',
-                  color: 'primary.main',
-                }}
-              />
-              料理メニュー
-            </Typography>
-          </Box>
+              料理を追加
+            </Button>
+          </Stack>
         </Fade>
 
         {/* エラーメッセージ */}
