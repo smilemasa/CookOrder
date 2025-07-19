@@ -18,6 +18,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"github.com/smilemasa/go-api/config"
+	"github.com/smilemasa/go-api/db"
 	dishes "github.com/smilemasa/go-api/handler/admin/dishes"
 	"github.com/smilemasa/go-api/utils"
 )
@@ -37,6 +38,13 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("Config loaded successfully")
+
+	// データベース疎通確認
+	if err := db.TestConnection(); err != nil {
+		fmt.Printf("❌ データベース疎通確認失敗: %v\n", err)
+		fmt.Println("アプリケーションを終了します")
+		os.Exit(1)
+	}
 
 	// GCSクライアントを初期化
 	bucketName := cfg.GCS.BucketName
